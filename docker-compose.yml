@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  nextjs:
+    build:
+      context: ./Opti-CAR-Front
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - express
+
+  express:
+    build:
+      context: ./Opti-CAR-Back
+      dockerfile: Dockerfile
+    ports:
+      - "5424:5424"
+  
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+
+volumes:
+  influxdb_data:
