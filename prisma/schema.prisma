@@ -1,0 +1,80 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  password String
+  name     String
+  role     Role     @relation(fields: [roleId], references: [id])
+  roleId   Int
+  tasks    Task[]   @relation("TaskCompletedBy")
+}
+
+model Role {
+  id     Int      @id @default(autoincrement())
+  name   String   @unique
+  users  User[]
+  tasks  Task[]
+}
+
+model Alert {
+  id          Int        @id @default(autoincrement())
+  name        String
+  status      Boolean
+  criticality Int
+  machine     Machine    @relation(fields: [machineId], references: [machine_id])
+  machineId   String
+  timestamp   DateTime   @default(now())
+}
+
+
+model Task {
+  id           Int      @id @default(autoincrement())
+  name         String
+  description  String
+  machine      Machine  @relation(fields: [machineId], references: [machine_id])
+  machineId    String
+  isCompleted  Boolean  @default(false)
+  role         Role     @relation(fields: [roleId], references: [id])
+  roleId       Int
+  completedBy  User?    @relation("TaskCompletedBy", fields: [completedById], references: [id])
+  completedById Int?    
+}
+
+model MachineType {
+  id     Int      @id @default(autoincrement())
+  name   String   @unique
+  machines Machine[]
+}
+
+model Machine {
+  machine_id  String       @id
+  machineType MachineType  @relation(fields: [machineTypeId], references: [id])
+  machineTypeId Int
+  alerts       Alert[]
+  seuils       MachineSeuil[]
+  tasks Task[]
+}
+
+model MachineSensor {
+  id   Int      @id @default(autoincrement())
+  name String   @unique
+  seuils MachineSeuil[]
+}
+
+model MachineSeuil {
+  id         Int          @id @default(autoincrement())
+  machine    Machine      @relation(fields: [machineId], references: [machine_id])
+  machineId  String
+  minValue   Float
+  maxValue   Float
+  limitName  MachineSensor @relation(fields: [limitNameId], references: [id])
+  limitNameId Int
+}
