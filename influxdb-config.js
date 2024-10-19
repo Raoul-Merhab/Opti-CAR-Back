@@ -6,7 +6,13 @@ const token =
 const org = "DevFest";
 const bucket = "testOuanes";
 
-const queryApi = new InfluxDB({ url, token }).getQueryApi(org);
-const writeApi = new InfluxDB({ url, token }).getWriteApi(org, bucket);
+const dbServer = new InfluxDB({ url, token });
+
+const queryApi = () => {
+  return dbServer.getQueryApi(org);
+};
+const writeApi = () => {
+  return dbServer.getWriteApi(org, bucket);
+};
 
 module.exports = { queryApi, writeApi, Point };

@@ -71,7 +71,7 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/", verifyToken, verifyRole(2), async (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
   console.log("GET /machines");
   console.log(req.user);
 
