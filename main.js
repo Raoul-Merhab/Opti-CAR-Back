@@ -3,6 +3,9 @@ const cors = require("cors");
 const { PrismaClient } = require("@prisma/client");
 const machines = require("./routes/machines");
 const auth = require("./routes/auth");
+const data = require("./routes/data");
+
+const { InfluxDB } = require("@influxdata/influxdb-client");
 
 const PORT = 5424;
 
@@ -19,6 +22,7 @@ app.get("/", async (req, res) => {
 
 app.use("/machines", machines);
 app.use("/auth", auth);
+app.use("/data", data);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
