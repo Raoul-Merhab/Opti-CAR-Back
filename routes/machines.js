@@ -5,9 +5,9 @@ const prisma = new PrismaClient();
 router.use(express.json());
 const bcrypt = require("bcrypt");
 const cors = require("cors");
-const { connect } = require("net");
+const { verifyToken, verifyRole } = require("../middlewares/jwt");
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
   try {
     const { machineName, machineType, machineThresholds } = req.body;
 
@@ -71,7 +71,10 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", verifyToken, verifyRole(2), async (req, res) => {
+  console.log("GET /machines");
+  console.log(req.user);
+
   try {
     const machines = await prisma.machine.findMany({
       include: {
