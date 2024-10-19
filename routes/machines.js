@@ -9,21 +9,60 @@ const { connect } = require("net");
 
 router.post("/", async (req, res) => {
   try {
-    const { machine, type } = req.body;
+    const { machineName, machineType, machineThresholds } = req.body;
 
+    // Step 1: Create the machine
     const newMachine = await prisma.machine.create({
       data: {
-        machine_id: machine,
+        machine_id: machineName,
         machineType: {
           connect: {
-            name: type,
+            name: machineType,
           },
         },
       },
     });
 
+    // Step 2: Handle machine thresholds
+    if (machineThresholds && Object.keys(machineThresholds).length > 0) {
+      // Loop through each threshold entry in machineThresholds
+      for (const [sensorName, { min, max }] of Object.entries(
+        machineThresholds
+      )) {
+        // Check if the sensor already exists in MachineSensor
+        let sensor = await prisma.machineSensor.findUnique({
+          where: { name: sensorName },
+        });
+
+        // If the sensor doesn't exist, create it
+        if (!sensor) {
+          res.status(400).json({
+            error: `Sensor ${sensorName} not found`,
+          });
+        }
+
+        // Create MachineSeuil (threshold) for the machine
+        await prisma.machineSeuil.create({
+          data: {
+            machine: {
+              connect: {
+                machine_id: newMachine.machine_id,
+              },
+            },
+            minValue: min,
+            maxValue: max,
+            limitName: {
+              connect: {
+                id: sensor.id,
+              },
+            },
+          },
+        });
+      }
+    }
+
     res.status(201).json({
-      message: "Machine added successfully",
+      message: "Machine and thresholds added successfully",
       machine: newMachine,
     });
   } catch (error) {
@@ -37,7 +76,6 @@ router.get("/", async (req, res) => {
     const machines = await prisma.machine.findMany({
       include: {
         machineType: true,
-        machine_id: true,
       },
     });
 

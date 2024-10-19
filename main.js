@@ -4,7 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 const machines = require("./routes/machines");
 const auth = require("./routes/auth");
 
-const PORT = 8080;
+const PORT = 5424;
 
 const app = express();
 app.use(cors());
