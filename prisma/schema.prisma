@@ -27,7 +27,7 @@ model Role {
 model Alert {
   id          Int        @id @default(autoincrement())
   name        String
-  status      Boolean
+  status      Boolean 
   criticality Int
   machine     Machine    @relation(fields: [machineId], references: [machine_id])
   machineId   String

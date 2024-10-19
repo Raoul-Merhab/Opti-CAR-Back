@@ -89,7 +89,7 @@ router.post("/webhook", async (req, res) => {
       if (seuil) {
         if (
           (value < seuil.minValue || value > seuil.maxValue) &&
-          Math.random() > 0.9
+          Math.random() > 0.97
         ) {
           alertGenerated = true;
 
