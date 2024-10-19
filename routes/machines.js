@@ -5,9 +5,11 @@ const prisma = new PrismaClient();
 router.use(express.json());
 const bcrypt = require("bcrypt");
 const cors = require("cors");
+const {verifyToken, verifyRole} = require("../middlewares/jwt");
 
-router.post("/", async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
   try {
+
     const { machineName, machineType, machineThresholds } = req.body;
 
     // Step 1: Create the machine
@@ -65,6 +67,27 @@ router.post("/", async (req, res) => {
   } catch (error) {
     console.error("Error adding machine:", error);
     res.status(500).json({ error: "Failed to add machine" });
+  }
+});
+
+router.get("/", verifyToken, verifyRole(2), async (req, res) => {
+  console.log("GET /machines");
+  console.log(req.user);
+
+  try {
+    const machines = await prisma.machine.findMany({
+      include: {
+        machineType: true,
+      },
+    });
+
+    res.status(200).json({
+      message: "Machines retrieved successfully",
+      machines,
+    });
+  } catch (error) {
+    console.error("Error retrieving machines:", error);
+    res.status(402).json({ error: "Failed to retrieve machines" });
   }
 });
 

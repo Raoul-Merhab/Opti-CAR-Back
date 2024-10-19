@@ -11,15 +11,18 @@ const SECRET = "aniss_daghyoul";
 router.post("/signup", async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const crypted_password = await bcrypt.hash(req.body.password, salt);
+  const role = req.body.role;
   const { id, email } = await prisma.user.create({
     data: {
       email: req.body.email,
-      role: req.body.role,
+      role: {
+        connect: { id: req.body.role }, // Connect an existing role by its ID
+      },
       password: crypted_password,
       name: req.body.name,
     },
   });
-  const access_token = jwt.sign({ id }, SECRET, { expiresIn: "3 hours" });
+  const access_token = jwt.sign({ id, role }, SECRET, { expiresIn: "3 hours" });
   res.send({ id, email, token: access_token });
 });
 
@@ -28,6 +31,7 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await prisma.user.findUnique({
       where: { email },
+      include: { role: true },
     });
     if (!user) {
       return res.status(401).send({ error: "Mayexistich gae" });
@@ -36,7 +40,8 @@ router.post("/login", async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).send({ error: "Password ghalet" });
     }
-    const access_token = jwt.sign({ id: user.id }, SECRET, {
+    console.log(user.role);
+    const access_token = jwt.sign({ id: user.id, role: user.role.id }, SECRET, {
       expiresIn: "3 hours",
     });
 
