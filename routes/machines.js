@@ -32,4 +32,23 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/", async (req, res) => {
+  try {
+    const machines = await prisma.machine.findMany({
+      include: {
+        machineType: true,
+        machine_id: true,
+      },
+    });
+
+    res.status(200).json({
+      message: "Machines retrieved successfully",
+      machines,
+    });
+  } catch (error) {
+    console.error("Error retrieving machines:", error);
+    res.status(402).json({ error: "Failed to retrieve machines" });
+  }
+});
+
 module.exports = router;
